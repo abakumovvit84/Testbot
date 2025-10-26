@@ -11,162 +11,620 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
-            padding: 20px;
-            line-height: 1.5;
+            padding: 16px;
+            padding-bottom: 80px;
         }
+
         .container {
-            max-width: 400px;
+            max-width: 100%;
             margin: 0 auto;
         }
+
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             border-radius: 16px;
         }
-        .card {
-            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
         }
-        .btn {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
+
         .tabs {
             display: flex;
-            gap: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            padding: 4px;
             margin-bottom: 20px;
         }
+
         .tab {
             flex: 1;
             padding: 12px;
             text-align: center;
-            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
             border-radius: 8px;
             cursor: pointer;
+            transition: all 0.3s;
         }
+
         .tab.active {
             background: var(--tg-theme-button-color, #2481cc);
             color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .transfer-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #999);
+        }
+
+        .transfer-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+
+        .btn {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 16px;
+        }
+
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .category-tag {
+            padding: 6px 12px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .category-tag.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Шапка -->
         <div class="header">
             <h1>📦 LendTrack</h1>
             <p>Учет передач между друзьями</p>
         </div>
 
+        <!-- Вкладки -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('main')">Главная</div>
-            <div class="tab" onclick="switchTab('transfers')">Передачи</div>
-            <div class="tab" onclick="switchTab('categories')">Категории</div>
+            <div class="tab active" onclick="switchTab('dashboard')">📊</div>
+            <div class="tab" onclick="switchTab('transfers')">🔄</div>
+            <div class="tab" onclick="switchTab('contacts')">👥</div>
+            <div class="tab" onclick="switchTab('categories')">🏷️</div>
         </div>
 
-        <div id="main" class="tab-content">
-            <div class="card">
-                <h3>👋 Привет!</h3>
-                <p>Это тестовое приложение LendTrack.</p>
-                <div id="user-info">Загрузка...</div>
-            </div>
-            
-            <div class="card">
-                <h3>📊 Статистика</h3>
-                <p>Активные передачи: <strong id="active-count">0</strong></p>
-                <p>Ожидают подтверждения: <strong id="pending-count">0</strong></p>
+        <!-- Дашборд -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="activeTransfers">0</div>
+                    <div class="stat-label">Активные</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingTransfers">0</div>
+                    <div class="stat-label">Ожидают</div>
+                </div>
             </div>
 
-            <button class="btn" onclick="testNotification()">Тест уведомления</button>
+            <h3>Последние операции</h3>
+            <div id="recentTransfers">
+                <!-- Список передач будет здесь -->
+            </div>
         </div>
 
-        <div id="transfers" class="tab-content" style="display: none;">
-            <div class="card">
-                <h3>🔄 Мои передачи</h3>
-                <p>Список передач появится здесь</p>
+        <!-- Список передач -->
+        <div id="transfers" class="tab-content">
+            <div id="transfersList">
+                <!-- Список всех передач -->
             </div>
-            <button class="btn" onclick="createTestTransfer()">Создать тестовую передачу</button>
         </div>
 
-        <div id="categories" class="tab-content" style="display: none;">
+        <!-- Контакты -->
+        <div id="contacts" class="tab-content">
             <div class="card">
-                <h3>🏷️ Категории</h3>
-                <p>Управление категориями появится здесь</p>
+                <h3>Мои контакты</h3>
+                <div id="contactsList">
+                    <!-- Список контактов -->
+                </div>
             </div>
-            <button class="btn" onclick="createTestCategory()">Создать тестовую категорию</button>
+        </div>
+
+        <!-- Категории -->
+        <div id="categories" class="tab-content">
+            <div class="card">
+                <h3>Категории предметов</h3>
+                <div class="category-tags" id="categoriesList">
+                    <!-- Категории будут здесь -->
+                </div>
+                <button class="btn" onclick="showCategoryForm()">+ Добавить категорию</button>
+            </div>
+        </div>
+
+        <!-- Форма создания передачи -->
+        <div id="createTransferForm" class="tab-content hidden">
+            <div class="card">
+                <h3>Новая передача</h3>
+                
+                <div class="form-group">
+                    <label>Что передаете?</label>
+                    <input type="text" id="itemName" placeholder="Например: Шуруповерт" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select id="itemCategory">
+                        <option value="">Выберите категорию</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Кому передаете?</label>
+                    <input type="text" id="contactName" placeholder="Имя друга" required>
+                    <input type="tel" id="contactPhone" placeholder="Телефон" style="margin-top: 8px;">
+                </div>
+
+                <div class="form-group">
+                    <label>Срок возврата</label>
+                    <input type="date" id="dueDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Описание (необязательно)</label>
+                    <textarea id="itemDescription" rows="3" placeholder="Дополнительная информация..."></textarea>
+                </div>
+
+                <button class="btn" onclick="createTransfer()">Создать передачу</button>
+                <button class="btn" onclick="switchTab('transfers')" style="background: #6c757d; margin-top: 8px;">Отмена</button>
+            </div>
+        </div>
+
+        <!-- Форма создания категории -->
+        <div id="createCategoryForm" class="tab-content hidden">
+            <div class="card">
+                <h3>Новая категория</h3>
+                
+                <div class="form-group">
+                    <label>Название категории</label>
+                    <input type="text" id="categoryName" placeholder="Например: Электроника" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Иконка</label>
+                    <div class="category-tags" id="emojiPicker">
+                        <span class="category-tag" onclick="selectEmoji('🛠️')">🛠️</span>
+                        <span class="category-tag" onclick="selectEmoji('📱')">📱</span>
+                        <span class="category-tag" onclick="selectEmoji('📚')">📚</span>
+                        <span class="category-tag" onclick="selectEmoji('⚽')">⚽</span>
+                        <span class="category-tag" onclick="selectEmoji('🏠')">🏠</span>
+                        <span class="category-tag" onclick="selectEmoji('👕')">👕</span>
+                        <span class="category-tag" onclick="selectEmoji('🎮')">🎮</span>
+                        <span class="category-tag" onclick="selectEmoji('📦')">📦</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="createCategory()">Создать категорию</button>
+                <button class="btn" onclick="switchTab('categories')" style="background: #6c757d; margin-top: 8px;">Отмена</button>
+            </div>
         </div>
     </div>
+
+    <!-- Кнопка добавления -->
+    <button class="floating-btn" onclick="showCreateTransferForm()">+</button>
 
     <script>
         // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        
+        let transfers = [];
+        let categories = [];
+        let contacts = [];
+        let selectedEmoji = '📦';
+
+        // Инициализация приложения
         function initApp() {
             tg.expand();
             tg.ready();
             
-            // Показываем информацию о пользователе
-            const user = tg.initDataUnsafe.user;
-            if (user) {
-                document.getElementById('user-info').innerHTML = `
-                    <p><strong>Имя:</strong> ${user.first_name}</p>
-                    <p><strong>ID:</strong> ${user.id}</p>
-                    ${user.username ? `<p><strong>Username:</strong> @${user.username}</p>` : ''}
-                `;
-            }
+            // Загружаем тестовые данные
+            loadSampleData();
+            renderDashboard();
+            renderCategories();
+            renderTransfers();
             
-            console.log('LendTrack запущен!');
+            console.log('Приложение инициализировано для пользователя:', tg.initDataUnsafe.user);
         }
 
+        // Загрузка тестовых данных
+        function loadSampleData() {
+            categories = [
+                { id: 1, name: 'Инструменты', emoji: '🛠️', color: '#FF6B35' },
+                { id: 2, name: 'Электроника', emoji: '📱', color: '#4ECDC4' },
+                { id: 3, name: 'Книги', emoji: '📚', color: '#45B7D1' },
+                { id: 4, name: 'Другое', emoji: '📦', color: '#778899' }
+            ];
+
+            transfers = [
+                {
+                    id: 1,
+                    item: 'Шуруповерт',
+                    category: 'Инструменты',
+                    contact: 'Иван Петров',
+                    date: '2024-01-15',
+                    dueDate: '2024-01-25',
+                    status: 'confirmed',
+                    description: 'Аккумуляторный, синий'
+                },
+                {
+                    id: 2,
+                    item: 'Книга "JavaScript"',
+                    category: 'Книги',
+                    contact: 'Мария Сидорова',
+                    date: '2024-01-18',
+                    dueDate: '2024-02-01',
+                    status: 'pending',
+                    description: 'Том 2'
+                }
+            ];
+
+            contacts = [
+                { name: 'Иван Петров', phone: '+79991112233' },
+                { name: 'Мария Сидорова', phone: '+79994445566' },
+                { name: 'Алексей Козлов', phone: '+79997778899' }
+            ];
+        }
+
+        // Переключение вкладок
         function switchTab(tabName) {
             // Скрываем все вкладки
             document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.style.display = 'none';
+                tab.classList.remove('active');
             });
             
             // Показываем выбранную вкладку
-            document.getElementById(tabName).style.display = 'block';
+            document.getElementById(tabName).classList.add('active');
             
-            // Обновляем активные табы
+            // Обновляем активную кнопку таба
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             event.target.classList.add('active');
         }
 
-        function testNotification() {
+        // Показать форму создания передачи
+        function showCreateTransferForm() {
+            switchTab('createTransferForm');
+            renderCategoryOptions();
+        }
+
+        // Показать форму создания категории
+        function showCategoryForm() {
+            switchTab('createCategoryForm');
+        }
+
+        // Выбор эмодзи для категории
+        function selectEmoji(emoji) {
+            selectedEmoji = emoji;
+            document.querySelectorAll('#emojiPicker .category-tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Создание категории
+        function createCategory() {
+            const name = document.getElementById('categoryName').value;
+            
+            if (!name) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Введите название категории',
+                    buttons: [{ type: 'ok' }]
+                });
+                return;
+            }
+
+            const newCategory = {
+                id: Date.now(),
+                name: name,
+                emoji: selectedEmoji,
+                color: '#6c757d'
+            };
+
+            categories.push(newCategory);
+            
             tg.showPopup({
-                title: '✅ Тест',
-                message: 'Приложение работает корректно!',
+                title: 'Успешно',
+                message: `Категория "${name}" создана`,
                 buttons: [{ type: 'ok' }]
+            });
+
+            renderCategories();
+            switchTab('categories');
+        }
+
+        // Создание передачи
+        function createTransfer() {
+            const itemName = document.getElementById('itemName').value;
+            const category = document.getElementById('itemCategory').value;
+            const contactName = document.getElementById('contactName').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const description = document.getElementById('itemDescription').value;
+
+            if (!itemName || !category || !contactName || !dueDate) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Заполните все обязательные поля',
+                    buttons: [{ type: 'ok' }]
+                });
+                return;
+            }
+
+            const newTransfer = {
+                id: Date.now(),
+                item: itemName,
+                category: category,
+                contact: contactName,
+                date: new Date().toISOString().split('T')[0],
+                dueDate: dueDate,
+                status: 'pending',
+                description: description
+            };
+
+            transfers.unshift(newTransfer);
+            
+            tg.showPopup({
+                title: 'Успешно',
+                message: `Передача "${itemName}" создана`,
+                buttons: [{ type: 'ok' }]
+            });
+
+            // Имитация отправки уведомления
+            tg.showAlert(`📨 Уведомление отправлено ${contactName}`);
+
+            renderTransfers();
+            renderDashboard();
+            switchTab('transfers');
+            
+            // Очищаем форму
+            document.getElementById('createTransferForm').querySelectorAll('input, textarea').forEach(field => {
+                field.value = '';
             });
         }
 
-        function createTestTransfer() {
-            tg.showAlert('📦 Тестовая передача создана!');
-            document.getElementById('active-count').textContent = '1';
+        // Рендер категорий в выпадающий список
+        function renderCategoryOptions() {
+            const select = document.getElementById('itemCategory');
+            select.innerHTML = '<option value="">Выберите категорию</option>';
+            
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = `${category.emoji} ${category.name}`;
+                select.appendChild(option);
+            });
         }
 
-        function createTestCategory() {
-            tg.showAlert('🏷️ Тестовая категория создана!');
+        // Рендер категорий на вкладке
+        function renderCategories() {
+            const container = document.getElementById('categoriesList');
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const tag = document.createElement('span');
+                tag.className = 'category-tag';
+                tag.innerHTML = `${category.emoji} ${category.name}`;
+                container.appendChild(tag);
+            });
         }
 
-        // Запускаем приложение при загрузке
+        // Рендер передач
+        function renderTransfers() {
+            const container = document.getElementById('transfersList');
+            container.innerHTML = '';
+            
+            if (transfers.length === 0) {
+                container.innerHTML = '<div class="card"><p>Нет активных передач</p></div>';
+                return;
+            }
+            
+            transfers.forEach(transfer => {
+                const card = document.createElement('div');
+                card.className = 'card transfer-item';
+                card.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${transfer.item}</div>
+                        <div class="item-meta">
+                            ${transfer.emoji || '📦'} ${transfer.category} → ${transfer.contact}<br>
+                            📅 До: ${transfer.dueDate}
+                        </div>
+                    </div>
+                    <div class="status status-${transfer.status}">
+                        ${getStatusText(transfer.status)}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Рендер дашборда
+        function renderDashboard() {
+            const active = transfers.filter(t => t.status === 'confirmed').length;
+            const pending = transfers.filter(t => t.status === 'pending').length;
+            
+            document.getElementById('activeTransfers').textContent = active;
+            document.getElementById('pendingTransfers').textContent = pending;
+            
+            // Рендер последних передач
+            const recentContainer = document.getElementById('recentTransfers');
+            recentContainer.innerHTML = '';
+            
+            const recentTransfers = transfers.slice(0, 3);
+            recentTransfers.forEach(transfer => {
+                const card = document.createElement('div');
+                card.className = 'card transfer-item';
+                card.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${transfer.item}</div>
+                        <div class="item-meta">
+                            ${transfer.contact} • ${transfer.dueDate}
+                        </div>
+                    </div>
+                    <div class="status status-${transfer.status}">
+                        ${getStatusText(transfer.status)}
+                    </div>
+                `;
+                recentContainer.appendChild(card);
+            });
+        }
+
+        // Получение текста статуса
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Ожидает',
+                'confirmed': 'Подтверждено',
+                'rejected': 'Отклонено'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
