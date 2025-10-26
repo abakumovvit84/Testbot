@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LendTrack</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #667eea;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 LendTrack работает!</h1>
+        <p>Приложение для учета передач</p>
+        <div id="user-info">Загрузка...</div>
+        <button onclick="test()">Тестовая кнопка</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('user-info').innerHTML = `
+                <h3>👤 Привет, ${user.first_name}!</h3>
+                <p>ID: ${user.id}</p>
+            `;
+        }
+        
+        function test() {
+            tg.showPopup({
+                title: 'Тест',
+                message: 'Приложение работает!',
+                buttons: [{ type: 'ok' }]
+            });
+        }
+    </script>
+</body>
+</html>
