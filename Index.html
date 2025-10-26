@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LendTrack - Учет передач</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+        }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+        .transfer-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 LendTrack</h1>
+            <p>Учет передач между друзьями</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('main')">Главная</div>
+            <div class="tab" onclick="switchTab('transfers')">Передачи</div>
+            <div class="tab" onclick="switchTab('categories')">Категории</div>
+        </div>
+
+        <div id="main" class="tab-content">
+            <div class="card">
+                <h3>👋 Привет!</h3>
+                <p>Это тестовое приложение LendTrack.</p>
+                <div id="user-info">Загрузка...</div>
+            </div>
+            
+            <div class="card">
+                <h3>📊 Статистика</h3>
+                <p>Активные передачи: <strong id="active-count">0</strong></p>
+                <p>Ожидают подтверждения: <strong id="pending-count">0</strong></p>
+            </div>
+
+            <button class="btn" onclick="testNotification()">Тест уведомления</button>
+        </div>
+
+        <div id="transfers" class="tab-content" style="display: none;">
+            <div class="card">
+                <h3>🔄 Мои передачи</h3>
+                <div id="transfers-list">
+                    <div class="transfer-item">
+                        📚 Книга "JavaScript" → Мария 
+                        <span class="status status-pending">Ожидает</span>
+                    </div>
+                    <div class="transfer-item">
+                        🛠️ Шуруповерт → Иван 
+                        <span class="status status-confirmed">Подтверждено</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="createTestTransfer()">+ Создать передачу</button>
+        </div>
+
+        <div id="categories" class="tab-content" style="display: none;">
+            <div class="card">
+                <h3>🏷️ Категории</h3>
+                <div id="categories-list">
+                    <div style="padding: 8px 0;">🛠️ Инструменты</div>
+                    <div style="padding: 8px 0;">📚 Книги</div>
+                    <div style="padding: 8px 0;">📱 Электроника</div>
+                    <div style="padding: 8px 0;">📦 Другое</div>
+                </div>
+            </div>
+            <button class="btn" onclick="createTestCategory()">+ Добавить категорию</button>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        
+        function initApp() {
+            tg.expand();
+            tg.ready();
+            
+            // Показываем информацию о пользователе
+            const user = tg.initDataUnsafe.user;
+            if (user) {
+                document.getElementById('user-info').innerHTML = `
+                    <p><strong>Имя:</strong> ${user.first_name}</p>
+                    <p><strong>ID:</strong> ${user.id}</p>
+                    ${user.username ? `<p><strong>Username:</strong> @${user.username}</p>` : ''}
+                `;
+            }
+            
+            console.log('LendTrack запущен!');
+        }
+
+        function switchTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Показываем выбранную вкладку
+            document.getElementById(tabName).style.display = 'block';
+            
+            // Обновляем активные табы
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function testNotification() {
+            tg.showPopup({
+                title: '✅ Тест',
+                message: 'Приложение работает корректно!',
+                buttons: [{ type: 'ok' }]
+            });
+        }
+
+        function createTestTransfer() {
+            tg.showAlert('📦 Тестовая передача создана!');
+            document.getElementById('active-count').textContent = '3';
+        }
+
+        function createTestCategory() {
+            tg.showAlert('🏷️ Тестовая категория создана!');
+        }
+
+        // Запускаем приложение при загрузке
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
