@@ -187,44 +187,44 @@
             border-color: var(--tg-theme-button-color, var(--primary-color));
         }
 
-        .contacts-list {
-            max-height: 300px;
-            overflow-y: auto;
+        .contact-selector {
             margin-top: 12px;
         }
 
-        .contact-item {
+        .contact-btn {
+            width: 100%;
             padding: 16px;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #e9ecef);
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .contact-item:last-child {
-            border-bottom: none;
-        }
-
-        .contact-item:hover {
-            background: var(--tg-theme-bg-color, #ffffff);
-        }
-
-        .contact-item.selected {
             background: var(--tg-theme-button-color, var(--primary-color));
             color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .contact-name {
+        .contact-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .selected-contact {
+            margin-top: 12px;
+            padding: 16px;
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 12px;
+            border: 2px solid var(--tg-theme-button-color, var(--primary-color));
+        }
+
+        .selected-contact .name {
             font-weight: 600;
             margin-bottom: 4px;
         }
 
-        .contact-phone {
+        .selected-contact .phone {
             font-size: 14px;
             color: var(--tg-theme-hint-color, #6c757d);
-        }
-
-        .contact-item.selected .contact-phone {
-            color: rgba(255,255,255,0.8);
         }
 
         .btn {
@@ -252,6 +252,10 @@
 
         .btn-secondary {
             background: var(--tg-theme-secondary-bg-color, #6c757d);
+        }
+
+        .btn-success {
+            background: var(--success-color);
         }
 
         .history-section {
@@ -357,6 +361,21 @@
             color: var(--tg-theme-button-text-color, #ffffff);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+
+        .success-message {
+            background: var(--success-color);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -454,8 +473,14 @@
 
                 <div class="form-group">
                     <label>У кого взял?</label>
-                    <div id="borrowContactsList" class="contacts-list">
-                        <!-- Контакты из записной книги -->
+                    <div class="contact-selector">
+                        <button class="contact-btn" onclick="requestContact('borrow')">
+                            📞 Выбрать из контактов
+                        </button>
+                        <div id="borrowSelectedContact" class="selected-contact" style="display: none;">
+                            <div class="name" id="borrowContactName"></div>
+                            <div class="phone" id="borrowContactPhone"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -469,7 +494,9 @@
                     <textarea id="borrowDescription" rows="3" placeholder="Дополнительная информация..."></textarea>
                 </div>
 
-                <button class="btn" onclick="createBorrowTransaction()">✅ Подтвердить</button>
+                <button class="btn btn-success" onclick="createBorrowTransaction()">
+                    ✅ Подтвердить запись
+                </button>
             </div>
         </div>
 
@@ -489,8 +516,14 @@
 
                 <div class="form-group">
                     <label>Кому отдал?</label>
-                    <div id="lendContactsList" class="contacts-list">
-                        <!-- Контакты из записной книги -->
+                    <div class="contact-selector">
+                        <button class="contact-btn" onclick="requestContact('lend')">
+                            📞 Выбрать из контактов
+                        </button>
+                        <div id="lendSelectedContact" class="selected-contact" style="display: none;">
+                            <div class="name" id="lendContactName"></div>
+                            <div class="phone" id="lendContactPhone"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -504,7 +537,9 @@
                     <textarea id="lendDescription" rows="3" placeholder="Дополнительная информация..."></textarea>
                 </div>
 
-                <button class="btn" onclick="createLendTransaction()">✅ Подтвердить</button>
+                <button class="btn btn-success" onclick="createLendTransaction()">
+                    ✅ Подтвердить запись
+                </button>
             </div>
         </div>
     </div>
@@ -515,10 +550,10 @@
         
         // Данные приложения
         let transactions = [];
-        let contacts = [];
         let currentTransactionType = ''; // 'borrow' или 'lend'
         let currentCategory = ''; // 'equipment', 'finance', 'other'
         let selectedContact = null;
+        let currentFormType = ''; // Для какого формы выбран контакт
 
         // Инициализация приложения
         function initApp() {
@@ -528,10 +563,27 @@
             // Загружаем тестовые данные
             loadSampleData();
             
-            // Загружаем контакты (в реальном приложении - из Telegram)
-            loadContacts();
+            // Включаем кнопку для закрытия
+            tg.BackButton.show();
+            tg.BackButton.onClick(handleBackButton);
             
-            console.log('LendTrack упрощенный запущен!');
+            console.log('LendTrack с выбором контактов запущен!');
+        }
+
+        // Обработка кнопки назад
+        function handleBackButton() {
+            if (document.getElementById('borrowForm').classList.contains('active') || 
+                document.getElementById('lendForm').classList.contains('active')) {
+                // Если открыта форма - возвращаемся к подменю
+                showSubmenu(currentTransactionType);
+            } else if (document.getElementById('borrowSubmenu').classList.contains('active') || 
+                      document.getElementById('lendSubmenu').classList.contains('active')) {
+                // Если открыто подменю - возвращаемся к главному меню
+                showMainMenu();
+            } else {
+                // Если главное меню - скрываем кнопку назад
+                tg.BackButton.hide();
+            }
         }
 
         // Загрузка тестовых данных
@@ -543,7 +595,11 @@
                     type: 'borrow',
                     category: 'equipment',
                     item: 'Шуруповерт аккумуляторный',
-                    contact: { name: 'Иван Петров', phone: '+79991112233' },
+                    contact: { 
+                        first_name: 'Иван',
+                        last_name: 'Петров',
+                        phone_number: '+79991112233'
+                    },
                     date: '2024-01-15',
                     dueDate: '2024-01-25',
                     status: 'active',
@@ -554,7 +610,11 @@
                     type: 'lend',
                     category: 'finance',
                     item: '5000 рублей',
-                    contact: { name: 'Мария Сидорова', phone: '+79994445566' },
+                    contact: { 
+                        first_name: 'Мария',
+                        last_name: 'Сидорова', 
+                        phone_number: '+79994445566'
+                    },
                     date: '2024-01-18',
                     dueDate: '2024-02-01',
                     status: 'active',
@@ -566,48 +626,45 @@
             renderHistory();
         }
 
-        // Загрузка контактов (имитация записной книги Telegram)
-        function loadContacts() {
-            contacts = [
-                { name: 'Иван Петров', phone: '+79991112233' },
-                { name: 'Мария Сидорова', phone: '+79994445566' },
-                { name: 'Алексей Козлов', phone: '+79997778899' },
-                { name: 'Елена Волкова', phone: '+79995554433' },
-                { name: 'Дмитрий Смирнов', phone: '+79993332211' }
-            ];
-
-            renderContacts('borrow');
-            renderContacts('lend');
-        }
-
-        // Рендер контактов
-        function renderContacts(type) {
-            const container = document.getElementById(type + 'ContactsList');
-            container.innerHTML = '';
+        // Запрос контакта из телефонной книги
+        function requestContact(formType) {
+            currentFormType = formType;
             
-            contacts.forEach(contact => {
-                const contactElement = document.createElement('div');
-                contactElement.className = 'contact-item';
-                contactElement.innerHTML = `
-                    <div class="contact-name">${contact.name}</div>
-                    <div class="contact-phone">${contact.phone}</div>
-                `;
-                contactElement.onclick = () => selectContact(contact, type);
-                container.appendChild(contactElement);
-            });
+            if (tg.platform !== 'unknown') {
+                // В реальном Telegram - открываем выбор контакта
+                tg.requestContact((contact) => {
+                    handleContactSelected(contact, formType);
+                });
+            } else {
+                // Для тестирования вне Telegram - имитируем выбор
+                const testContact = {
+                    first_name: 'Тестовый',
+                    last_name: 'Контакт',
+                    phone_number: '+79990001122'
+                };
+                handleContactSelected(testContact, formType);
+            }
         }
 
-        // Выбор контакта
-        function selectContact(contact, type) {
+        // Обработка выбранного контакта
+        function handleContactSelected(contact, formType) {
             selectedContact = contact;
             
-            // Снимаем выделение со всех контактов
-            document.querySelectorAll('.contact-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+            const name = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+            const phone = contact.phone_number;
             
-            // Выделяем выбранный контакт
-            event.target.closest('.contact-item').classList.add('selected');
+            // Показываем выбранный контакт в форме
+            const container = document.getElementById(formType + 'SelectedContact');
+            const nameElement = document.getElementById(formType + 'ContactName');
+            const phoneElement = document.getElementById(formType + 'ContactPhone');
+            
+            nameElement.textContent = name || 'Имя не указано';
+            phoneElement.textContent = phone || 'Телефон не указан';
+            container.style.display = 'block';
+            
+            // Показываем уведомление о выборе
+            tg.HapticFeedback.impactOccurred('soft');
+            tg.showAlert(`✅ Выбран контакт: ${name}`);
         }
 
         // Показать главное меню
@@ -615,6 +672,7 @@
             hideAllSections();
             document.getElementById('mainMenu').style.display = 'grid';
             document.getElementById('historySection').classList.add('active');
+            tg.BackButton.hide();
         }
 
         // Показать подменю
@@ -622,6 +680,7 @@
             hideAllSections();
             currentTransactionType = type;
             document.getElementById(type + 'Submenu').classList.add('active');
+            tg.BackButton.show();
         }
 
         // Показать форму ВЗЯЛ
@@ -643,11 +702,11 @@
             nextWeek.setDate(nextWeek.getDate() + 7);
             document.getElementById('borrowDueDate').value = nextWeek.toISOString().split('T')[0];
             
-            // Сбрасываем выбранный контакт
+            // Сбрасываем выбранный контакт для этой формы
+            document.getElementById('borrowSelectedContact').style.display = 'none';
             selectedContact = null;
-            document.querySelectorAll('#borrowContactsList .contact-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+            
+            tg.BackButton.show();
         }
 
         // Показать форму ОТДАЛ
@@ -669,11 +728,11 @@
             nextWeek.setDate(nextWeek.getDate() + 7);
             document.getElementById('lendDueDate').value = nextWeek.toISOString().split('T')[0];
             
-            // Сбрасываем выбранный контакт
+            // Сбрасываем выбранный контакт для этой формы
+            document.getElementById('lendSelectedContact').style.display = 'none';
             selectedContact = null;
-            document.querySelectorAll('#lendContactsList .contact-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+            
+            tg.BackButton.show();
         }
 
         // Скрыть все секции
@@ -685,6 +744,7 @@
             document.querySelectorAll('.form-section').forEach(section => {
                 section.classList.remove('active');
             });
+            document.getElementById('historySection').classList.remove('active');
         }
 
         // Создать транзакцию ВЗЯЛ
@@ -709,10 +769,16 @@
 
             transactions.unshift(newTransaction);
             
-            showNotification('Успех', `Запись "Взял" создана`);
+            // Вместо всплывающего окна - показываем успех в интерфейсе
+            showSuccessMessage('✅ Запись "Взял" успешно создана!');
+            
             resetForm('borrow');
             renderHistory();
-            showMainMenu();
+            
+            // Автоматически возвращаемся к истории через 1.5 секунды
+            setTimeout(() => {
+                showMainMenu();
+            }, 1500);
         }
 
         // Создать транзакцию ОТДАЛ
@@ -737,26 +803,45 @@
 
             transactions.unshift(newTransaction);
             
-            showNotification('Успех', `Запись "Отдал" создана`);
+            // Вместо всплывающего окна - показываем успех в интерфейсе
+            showSuccessMessage('✅ Запись "Отдал" успешно создана!');
+            
             resetForm('lend');
             renderHistory();
-            showMainMenu();
+            
+            // Автоматически возвращаемся к истории через 1.5 секунды
+            setTimeout(() => {
+                showMainMenu();
+            }, 1500);
+        }
+
+        // Показать сообщение об успехе
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            
+            const card = document.querySelector('.form-section.active .card');
+            card.insertBefore(successDiv, card.firstChild);
+            
+            // Вибрация для подтверждения
+            tg.HapticFeedback.impactOccurred('soft');
         }
 
         // Валидация формы
         function validateForm(itemName, dueDate) {
             if (!itemName) {
-                showNotification('Ошибка', 'Введите название предмета');
+                tg.showAlert('Введите название предмета');
                 return false;
             }
 
             if (!selectedContact) {
-                showNotification('Ошибка', 'Выберите контакт из списка');
+                tg.showAlert('Выберите контакт из телефонной книги');
                 return false;
             }
 
             if (!dueDate) {
-                showNotification('Ошибка', 'Выберите дату возврата');
+                tg.showAlert('Выберите дату возврата');
                 return false;
             }
 
@@ -767,10 +852,8 @@
         function resetForm(type) {
             document.getElementById(type + 'ItemName').value = '';
             document.getElementById(type + 'Description').value = '';
+            document.getElementById(type + 'SelectedContact').style.display = 'none';
             selectedContact = null;
-            document.querySelectorAll('#' + type + 'ContactsList .contact-item').forEach(item => {
-                item.classList.remove('selected');
-            });
         }
 
         // Показать вкладку истории
@@ -810,7 +893,7 @@
                                 ${transaction.item}
                             </div>
                             <div class="item-meta">
-                                👤 ${transaction.contact.name}<br>
+                                👤 ${getContactName(transaction.contact)}<br>
                                 📅 Вернуть: ${formatDate(transaction.dueDate)}
                                 ${transaction.description ? `<br>📝 ${transaction.description}` : ''}
                             </div>
@@ -824,6 +907,11 @@
         }
 
         // Вспомогательные функции
+        function getContactName(contact) {
+            if (!contact) return 'Не указан';
+            return `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Без имени';
+        }
+
         function getCategoryIcon(category) {
             const icons = {
                 'equipment': '🛠️',
@@ -840,14 +928,6 @@
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('ru-RU');
-        }
-
-        function showNotification(title, message) {
-            tg.showPopup({
-                title: title,
-                message: message,
-                buttons: [{ type: 'ok' }]
-            });
         }
 
         // Запускаем приложение при загрузке
