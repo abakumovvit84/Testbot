@@ -600,15 +600,13 @@
         let currentCategory = '';
         let selectedContact = null;
 
-        // База контактов (можно расширять)
+        // База контактов
         let contactsDatabase = [
             { username: '@ivanov', name: 'Иван Петров', phone: '+79991112233' },
             { username: '@maria_s', name: 'Мария Сидорова', phone: '+79994445566' },
             { username: '@alex_kozlov', name: 'Алексей Козлов', phone: '+79997778899' },
             { username: '@elena_v', name: 'Елена Волкова', phone: '+79995554433' },
-            { username: '@dmitry_s', name: 'Дмитрий Смирнов', phone: '+79993332211' },
-            { username: '@annak', name: 'Анна Ковалева', phone: '+79996667788' },
-            { username: '@sergey_t', name: 'Сергей Тимофеев', phone: '+79998889900' }
+            { username: '@dmitry_s', name: 'Дмитрий Смирнов', phone: '+79993332211' }
         ];
 
         // История выбранных контактов
@@ -619,20 +617,20 @@
             tg.expand();
             tg.ready();
             
-            // Загружаем тестовые данные
             loadSampleData();
-            
-            // Включаем кнопку для закрытия
             tg.BackButton.show();
             tg.BackButton.onClick(handleBackButton);
-            
-            // Загружаем историю контактов из localStorage
             loadRecentContacts();
             
-            console.log('LendTrack с поиском контактов запущен!');
+            // Закрытие подсказок при клике вне поля
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.contact-input-container')) {
+                    hideContactSuggestions('borrow');
+                    hideContactSuggestions('lend');
+                }
+            });
         }
 
-        // Загрузка недавних контактов
         function loadRecentContacts() {
             const saved = localStorage.getItem('lendtrack_recent_contacts');
             if (saved) {
@@ -640,25 +638,19 @@
             }
         }
 
-        // Сохранение недавних контактов
         function saveRecentContacts() {
             localStorage.setItem('lendtrack_recent_contacts', JSON.stringify(recentContacts));
         }
 
-        // Добавление контакта в историю
         function addToRecentContacts(contact) {
-            // Удаляем если уже есть
             recentContacts = recentContacts.filter(c => c.username !== contact.username);
-            // Добавляем в начало
             recentContacts.unshift(contact);
-            // Ограничиваем размер истории
             if (recentContacts.length > 10) {
                 recentContacts = recentContacts.slice(0, 10);
             }
             saveRecentContacts();
         }
 
-        // Поиск контактов
         function searchContacts(formType, query) {
             const suggestionsContainer = document.getElementById(formType + 'ContactSuggestions');
             
@@ -669,21 +661,18 @@
 
             query = query.toLowerCase();
             
-            // Ищем в базе контактов
             const results = contactsDatabase.filter(contact => 
                 contact.username.toLowerCase().includes(query) ||
                 contact.name.toLowerCase().includes(query) ||
                 contact.phone.includes(query)
             );
 
-            // Ищем в недавних контактах
             const recentResults = recentContacts.filter(contact =>
                 contact.username.toLowerCase().includes(query) ||
                 contact.name.toLowerCase().includes(query) ||
                 contact.phone.includes(query)
             );
 
-            // Объединяем результаты, убирая дубликаты
             const allResults = [...recentResults];
             results.forEach(contact => {
                 if (!allResults.some(c => c.username === contact.username)) {
@@ -694,7 +683,6 @@
             displayContactSuggestions(formType, allResults);
         }
 
-        // Показать недавние контакты
         function showRecentContacts(formType) {
             const suggestionsContainer = document.getElementById(formType + 'ContactSuggestions');
             
@@ -709,7 +697,6 @@
             }
         }
 
-        // Отображение подсказок контактов
         function displayContactSuggestions(formType, contacts) {
             const suggestionsContainer = document.getElementById(formType + 'ContactSuggestions');
             
@@ -729,20 +716,17 @@
             }
         }
 
-        // Показать подсказки контактов
         function showContactSuggestions(formType) {
             const suggestionsContainer = document.getElementById(formType + 'ContactSuggestions');
             suggestionsContainer.style.display = 'block';
             showRecentContacts(formType);
         }
 
-        // Скрыть подсказки контактов
         function hideContactSuggestions(formType) {
             const suggestionsContainer = document.getElementById(formType + 'ContactSuggestions');
             suggestionsContainer.style.display = 'none';
         }
 
-        // Выбор контакта из подсказок
         function selectContactFromSuggestions(formType, username) {
             const contact = contactsDatabase.find(c => c.username === username) || 
                            recentContacts.find(c => c.username === username);
@@ -753,14 +737,10 @@
             }
         }
 
-        // Выбор контакта
         function selectContact(formType, contact) {
             selectedContact = contact;
-            
-            // Добавляем в недавние контакты
             addToRecentContacts(contact);
             
-            // Обновляем интерфейс
             const input = document.getElementById(formType + 'ContactInput');
             const selectedContainer = document.getElementById(formType + 'SelectedContact');
             const nameElement = document.getElementById(formType + 'ContactName');
@@ -771,11 +751,9 @@
             usernameElement.textContent = `${contact.username} • ${contact.phone}`;
             selectedContainer.style.display = 'block';
             
-            // Тактильный отклик
             tg.HapticFeedback.impactOccurred('soft');
         }
 
-        // Обработка кнопки назад
         function handleBackButton() {
             if (document.getElementById('borrowForm').classList.contains('active') || 
                 document.getElementById('lendForm').classList.contains('active')) {
@@ -788,7 +766,6 @@
             }
         }
 
-        // Загрузка тестовых данных
         function loadSampleData() {
             transactions = [
                 {
@@ -801,24 +778,11 @@
                     dueDate: '2024-01-25',
                     status: 'active',
                     description: 'Синий, комплект бит в комплекте'
-                },
-                {
-                    id: 2,
-                    type: 'lend',
-                    category: 'finance',
-                    item: '5000 рублей',
-                    contact: contactsDatabase[1],
-                    date: '2024-01-18',
-                    dueDate: '2024-02-01',
-                    status: 'active',
-                    description: 'На ремонт машины'
                 }
             ];
-
             renderHistory();
         }
 
-        // Показать главное меню
         function showMainMenu() {
             hideAllSections();
             document.getElementById('mainMenu').style.display = 'grid';
@@ -826,7 +790,6 @@
             tg.BackButton.hide();
         }
 
-        // Показать подменю
         function showSubmenu(type) {
             hideAllSections();
             currentTransactionType = type;
@@ -834,7 +797,6 @@
             tg.BackButton.show();
         }
 
-        // Показать форму ВЗЯЛ
         function showBorrowForm(category) {
             hideAllSections();
             currentCategory = category;
@@ -848,12 +810,10 @@
             document.getElementById('borrowFormTitle').textContent = titles[category];
             document.getElementById('borrowForm').classList.add('active');
             
-            // Устанавливаем дату по умолчанию
             const nextWeek = new Date();
             nextWeek.setDate(nextWeek.getDate() + 7);
             document.getElementById('borrowDueDate').value = nextWeek.toISOString().split('T')[0];
             
-            // Сбрасываем выбранный контакт
             document.getElementById('borrowSelectedContact').style.display = 'none';
             document.getElementById('borrowContactInput').value = '';
             selectedContact = null;
@@ -861,7 +821,6 @@
             tg.BackButton.show();
         }
 
-        // Показать форму ОТДАЛ
         function showLendForm(category) {
             hideAllSections();
             currentCategory = category;
@@ -875,12 +834,10 @@
             document.getElementById('lendFormTitle').textContent = titles[category];
             document.getElementById('lendForm').classList.add('active');
             
-            // Устанавливаем дату по умолчанию
             const nextWeek = new Date();
             nextWeek.setDate(nextWeek.getDate() + 7);
             document.getElementById('lendDueDate').value = nextWeek.toISOString().split('T')[0];
             
-            // Сбрасываем выбранный контакт
             document.getElementById('lendSelectedContact').style.display = 'none';
             document.getElementById('lendContactInput').value = '';
             selectedContact = null;
@@ -888,7 +845,6 @@
             tg.BackButton.show();
         }
 
-        // Скрыть все секции
         function hideAllSections() {
             document.getElementById('mainMenu').style.display = 'none';
             document.querySelectorAll('.submenu').forEach(section => {
@@ -898,13 +854,10 @@
                 section.classList.remove('active');
             });
             document.getElementById('historySection').classList.remove('active');
-            
-            // Скрываем все подсказки контактов
             hideContactSuggestions('borrow');
             hideContactSuggestions('lend');
         }
 
-        // Создать транзакцию ВЗЯЛ
         function createBorrowTransaction() {
             const itemName = document.getElementById('borrowItemName').value.trim();
             const dueDate = document.getElementById('borrowDueDate').value;
@@ -925,7 +878,6 @@
             };
 
             transactions.unshift(newTransaction);
-            
             showSuccessMessage('✅ Запись "Взял" успешно создана!');
             resetForm('borrow');
             renderHistory();
@@ -935,7 +887,6 @@
             }, 1500);
         }
 
-        // Создать транзакцию ОТДАЛ
         function createLendTransaction() {
             const itemName = document.getElementById('lendItemName').value.trim();
             const dueDate = document.getElementById('lendDueDate').value;
@@ -956,7 +907,6 @@
             };
 
             transactions.unshift(newTransaction);
-            
             showSuccessMessage('✅ Запись "Отдал" успешно создана!');
             resetForm('lend');
             renderHistory();
@@ -966,7 +916,6 @@
             }, 1500);
         }
 
-        // Показать сообщение об успехе
         function showSuccessMessage(message) {
             const successDiv = document.createElement('div');
             successDiv.className = 'success-message';
@@ -978,7 +927,6 @@
             tg.HapticFeedback.impactOccurred('soft');
         }
 
-        // Валидация формы
         function validateForm(itemName, dueDate) {
             if (!itemName) {
                 tg.showAlert('Введите название предмета');
@@ -998,7 +946,6 @@
             return true;
         }
 
-        // Сброс формы
         function resetForm(type) {
             document.getElementById(type + 'ItemName').value = '';
             document.getElementById(type + 'Description').value = '';
@@ -1007,14 +954,12 @@
             selectedContact = null;
         }
 
-        // Показать вкладку истории
         function showHistoryTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
             renderHistory(tab);
         }
 
-        // Рендер истории
         function renderHistory(filter = 'active') {
             const container = document.getElementById('historyContent');
             
@@ -1057,7 +1002,6 @@
             `).join('');
         }
 
-        // Вспомогательные функции
         function getCategoryIcon(category) {
             const icons = {
                 'equipment': '🛠️',
@@ -1076,5 +1020,8 @@
             return date.toLocaleDateString('ru-RU');
         }
 
-        // Закрытие подсказок при клике вне поля
-        document
+        // Запускаем приложение при загрузке
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
